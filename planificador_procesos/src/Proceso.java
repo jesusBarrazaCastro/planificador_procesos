@@ -1,33 +1,56 @@
+import java.util.Random;
 
 public class Proceso {
-    int pId;
-    int tiempoEjecucion;
-    int estado;
+        int pId;
+        int tiempoEjecucion;
+        int estado; // 1: en ejecucion - 2: listo - 3: bloqueado
 
-    public Proceso(int pId, int tiempoEjecucion, int estado){
-        this.pId = pId;
-        this.tiempoEjecucion = tiempoEjecucion;
-        this.estado = estado;
-    }
+        public Proceso(int pId, int tiempoEjecucion, int estado){
+            this.pId = pId;
+            this.tiempoEjecucion = tiempoEjecucion;
+            this.estado = estado;
+        }
 
-    public int getTiempoEjecucion() {
-        return tiempoEjecucion;
-    }
+        Random random = new Random();
 
-    public void setTiempoEjecucion(int tiempoEjecucion) {
-        this.tiempoEjecucion = tiempoEjecucion;
-    }
+        public int getTiempoEjecucion() {
+            return tiempoEjecucion;
+        }
 
-    public int getEstado() {
-        return estado;
-    }
+        public void setTiempoEjecucion(int tiempoEjecucion) {
+            this.tiempoEjecucion = tiempoEjecucion;
+        }
 
-    public void setEstado(int estado) {
-        this.estado = estado;
-    }
+        public int getEstado() {
+            return estado;
+        }
 
-    @Override
-    public String toString() {
-        return "|" + pId + "\t|" + tiempoEjecucion + "\t|" + estado + "\t|";
+        public void setEstado(int estado) {
+            this.estado = estado;
+        }
+
+        public void ejecutar(int tiempo) {
+            // Verificar si se encuentra bloqueado y generar random para determinar si pasa a listo
+            if (estado == 3 && random.nextInt(2) == 0) {
+                System.out.println("Entra proceso " + pId + ", No se ejecuta porque sigue bloqueado");
+                return;
+            }
+            estado = (estado == 3) ? 2 : estado;
+
+            if (tiempoEjecucion > tiempo) {
+                tiempoEjecucion -= tiempo; //restar tiempo de ejecucion
+                System.out.println("Entra proceso " + pId + ", se ejecuta " + tiempo + " unidades " + ((tiempoEjecucion <= 0) ? "y termina" : "") );
+            } else {
+                tiempoEjecucion = 0;
+            }
+        }
+
+        public boolean estaCompleto() {
+            return tiempoEjecucion <= 0;
+        }
+
+        @Override
+        public String toString() {
+            return "|" + pId + "\t|" + tiempoEjecucion + "\t|" + estado + "\t|";
+        }
     }
-}

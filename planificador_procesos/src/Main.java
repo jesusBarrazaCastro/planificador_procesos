@@ -66,17 +66,17 @@ public class Main {
                 break;
         }
 
-        int tiempoMonitoreo = new Random().nextInt(10, 25); //GENERAR ALEATORIAMENTE EL TIEMPO DE MONITOREO DE CPU
-        int quantum = random.nextInt(2, 4); //GENERAR ALEATORIAMENTE EL QUANTUM
+        int tiempoMonitoreo = random.nextInt(10, 26); //GENERAR ALEATORIAMENTE EL TIEMPO DE MONITOREO DE CPU
+        int quantum = random.nextInt(2, 5); //GENERAR ALEATORIAMENTE EL QUANTUM
         //INICIALIZAR EL SIMULADOR DE PROCESOS
         Simulador simulador = new Simulador(tiempoMonitoreo, quantum);
 
         // CALCULAR DE MANERA ALEATORIA EL NUMERO DE PROCESOS
-        numProcesos = random.nextInt(1, 10);
+        numProcesos = random.nextInt(1, 11);
         // CREAR CADA UNO DE LOS PROCESOS
         for(int i = 0; i < numProcesos; i++){
-            int tiempoEjecucion = random.nextInt(3, 10); // CALCULAR ALEATORIAMENTE EL TIEMPO DE EJECUCION DE CADA PROCESO
-            int estadoActual = random.nextInt(1, 3); // CALCULAR ALEATORIAMENTE EL ESTADO ACTUAL DEL PROCESO
+            int tiempoEjecucion = random.nextInt(3, 11); // CALCULAR ALEATORIAMENTE EL TIEMPO DE EJECUCION DE CADA PROCESO
+            int estadoActual = random.nextInt(1, 4); // CALCULAR ALEATORIAMENTE EL ESTADO ACTUAL DEL PROCESO
             simulador.agregarProceso(new Proceso(i, tiempoEjecucion, estadoActual));
         }
 
