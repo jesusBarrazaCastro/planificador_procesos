@@ -53,4 +53,22 @@ public class Proceso {
         public String toString() {
             return "|" + pId + "\t|" + tiempoEjecucion + "\t|" + estado + "\t|";
         }
+
+        public int getDuracion() {
+            return 0;
+        }
+
+        public int getPrioridad() {
+            return 0;
+        }
+
+        public void setDuracion(int tiempoRestante) {
+        }
+
+        public void setTiempoRestante(int i) {
+        }
+
+        public int getTiempoRestante() {
+            return 0;
+        }
     }
