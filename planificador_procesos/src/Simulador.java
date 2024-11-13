@@ -28,7 +28,7 @@ public class Simulador {
     int cantidadCambios = 0;
 
     
-    public static void agregarProceso(Proceso proceso){
+    public void agregarProceso(Proceso proceso){
         procesos.add(proceso);
     }
 
@@ -38,60 +38,81 @@ public class Simulador {
         }
     }
 
-    public void ejecutarRoundRobin() {
-        while (!procesos.isEmpty()) {
+    public void simular(int tipoAlgoritmo, int algoritmo){
+        boolean preemprive = tipoAlgoritmo == 1;
+        switch (algoritmo){
+            case 1:
+                ejecutarRoundRobin(preemprive);
+                break;
+            case 2:
+                ejecutarPrioridades(preemprive);
+                break;
+        }
+        System.out.println("\nInforme final de ejecucion: ");
+        System.out.println("Procesos completados: " + Proceso.getProcesosIds(procesosCompletados));
+        System.out.println("Procesos sin ejecutar: " + Proceso.getProcesosIds(procesosSinEjecutar));
+        System.out.println("Procesos que siguen en ejecucion: " + Proceso.getProcesosIds(procesosSinEjecutar));
+        //System.out.println();
+    }
+
+    public void ejecutarRoundRobin(boolean preemtive) {
+        while (!procesos.isEmpty() && tiempoMonitoreo > 0) {
             Proceso procesoActual = procesos.poll(); // Obtiene y remueve el primer proceso en la cola
-            procesosEnEjecucion.add(procesoActual);
+            if(!procesosEnEjecucion.contains(procesoActual)){
+                procesosEnEjecucion.add(procesoActual);
+            }
 
             // Ejecuta el proceso por el tiempo del quantum
-            procesoActual.ejecutar(quantum);
+            boolean exec = procesoActual.ejecutar(preemtive ? quantum : procesoActual.getTiempoEjecucion());
 
             // Verifica si el proceso ha completado su ejecución
             if (procesoActual.estaCompleto()) {
                 procesosCompletados.add(procesoActual);
+                procesosEnEjecucion.remove(procesoActual);
             } else {
                 // Si no ha terminado, lo coloca de nuevo al final de la cola
                 procesos.add(procesoActual);
             }
-
             // Actualiza el estado de los procesos
-            procesosEnEjecucion.remove(procesoActual);
-            procesosSinEjecutar.remove(procesoActual);
-            
+            if(exec) tiempoMonitoreo -= (preemtive ? quantum : procesoActual.getTiempoEjecucion());
         }
-        System.out.println("Todos los procesos han sido completados.");
-
+        for (Proceso proceso : procesos) {
+            if (!procesosEnEjecucion.contains(proceso)) {
+                procesosSinEjecutar.add(proceso);
+            }
+        }
         
     }
 
-    public static void ejecutarProcesos(PriorityQueue<Proceso> colaProcesos) {
-        System.out.println("\nEjecutando procesos en orden de prioridad:");
-        while (!colaProcesos.isEmpty()) {
-            Proceso proceso = colaProcesos.poll(); // Saca el proceso con la mayor prioridad
-            System.out.println("Ejecutando " + proceso);
-            // Simula la ejecución
-            try {
-                Thread.sleep(proceso.getDuracion() * 100); // Duración en milisegundos
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+    public void ejecutarPrioridades(boolean preemptive) {
+        Collections.sort(procesos, Comparator.comparingInt(Proceso::getPrioridad).reversed());
+        while (!procesos.isEmpty() && tiempoMonitoreo > 0) {
+            Proceso procesoActual = procesos.poll();
+
+            if (!procesosEnEjecucion.contains(procesoActual)) {
+                procesosEnEjecucion.add(procesoActual);
+            }
+
+            boolean exec = procesoActual.ejecutar(preemptive ? procesoActual.getTiempoEjecucion() : 1);
+
+            if (procesoActual.estaCompleto()) {
+                procesosCompletados.add(procesoActual);
+                procesosEnEjecucion.remove(procesoActual);
+            } else {
+                procesos.add(procesoActual);  // Si no terminó, regresa a la cola
+            }
+
+            tiempoMonitoreo -= exec ? procesoActual.getTiempoEjecucion() : 0;
+        }
+
+        for (Proceso proceso : procesos) {
+            if (!procesosEnEjecucion.contains(proceso)) {
+                procesosEnEjecucion.add(proceso);
             }
         }
-        System.out.println("\nTodos los procesos han sido ejecutados.");
     }
 
-    public static void EjecutarMultiplesColasdePrioridad (String[] args) {
-        // Crea la cola de procesos con una prioridad de mayor a menor
-        PriorityQueue<Proceso> colaProcesos = new PriorityQueue<>(Comparator.comparingInt(p -> -p.getPrioridad()));
 
-        // Agrega procesos a la cola
-        colaProcesos.add(new Proceso(1, 3, 2)); // ID=1, Duración=3, Prioridad=2
-        colaProcesos.add(new Proceso(2, 1, 5)); // ID=2, Duración=1, Prioridad=5
-        colaProcesos.add(new Proceso(3, 2, 1)); // ID=3, Duración=2, Prioridad=1
-        colaProcesos.add(new Proceso(4, 4, 3)); // ID=4, Duración=4, Prioridad=3
-
-        // Ejecuta los procesos en la cola
-        ejecutarProcesos(colaProcesos);
-    }
 
     // Usamos un Map para almacenar colas separadas por cada nivel de prioridad
     private static Map<Integer, Queue<Proceso>> colasPrioridad = new TreeMap<>(Collections.reverseOrder());
@@ -140,18 +161,6 @@ public class Simulador {
         System.out.println("\nTodos los procesos han sido ejecutados.");
     }
 
-    public static void main(String[] args) {
-        // Agregar procesos de ejemplo con diferentes prioridades
-        agregarProceso(new Proceso(1, 3000, 2)); // ID=1, Duración=3000, Prioridad=2
-        agregarProceso(new Proceso(2, 1500, 5)); // ID=2, Duración=1500, Prioridad=5
-        agregarProceso(new Proceso(3, 2000, 3)); // ID=3, Duración=2000, Prioridad=3
-        agregarProceso(new Proceso(4, 4000, 2)); // ID=4, Duración=4000, Prioridad=2
-
-        // Ejecuta los procesos en orden de prioridad con múltiples colas
-        ejecutarProcesos();
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 }

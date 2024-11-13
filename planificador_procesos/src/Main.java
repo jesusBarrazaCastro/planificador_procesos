@@ -87,6 +87,7 @@ public class Main {
         System.out.println("Proceso | Tiempo restante ejecucion | Estado actual");
         simulador.getProcesos();
 
+        simulador.simular(tipoAlgoritmo, algoritmoInteractivo);
         scanner.close();
     }
 }
