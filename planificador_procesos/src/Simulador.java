@@ -1,12 +1,4 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Random;
-import java.util.TreeMap;
+import java.util.*;
 
 public class Simulador {
     private static LinkedList<Proceso> procesos;
@@ -34,11 +26,12 @@ public class Simulador {
 
     public void getProcesos(){
         for (Proceso proceso : procesos) {
-            System.out.printf("%-10s %-20d %-10s %-10d%n",
+            System.out.printf("%-10s %-20d %-10s %-10s %-10d%n",
                     proceso.getpId(),
                     proceso.getTiempoEjecucion(),
                     proceso.getEstado(),
-                    proceso.getPrioridad()
+                    proceso.getPrioridad(),
+                    proceso.getUser()
             );
         }
     }
@@ -64,6 +57,8 @@ public class Simulador {
             case 6:
                 ejecturarBoletosLoteria(preemptive);
                 break;
+            case 7:
+                ejecutarParticipacionEquitativa(preemptive);
         }
         System.out.println("\nInforme final de ejecucion: ");
         System.out.println("Procesos completados: " + Proceso.getProcesosIds(procesosCompletados));
@@ -341,12 +336,58 @@ public class Simulador {
                 }
             }
         }
-        
-        
 
-        
 
-    }   
+    public void ejecutarParticipacionEquitativa(boolean preemptive) {
+        // Mapa para contar cuántos procesos tiene cada usuario
+        Map<Integer, Integer> procesosPorUsuario = new HashMap<>();
+        for (Proceso proceso : procesos) {
+            procesosPorUsuario.put(proceso.getUser(), procesosPorUsuario.getOrDefault(proceso.getUser(), 0) + 1);
+        }
+
+        int usuariosTotales = procesosPorUsuario.size(); // Número total de usuarios
+        int tiempoAsignadoPorUsuario = tiempoMonitoreo / usuariosTotales; // Tiempo de CPU para cada usuario
+
+        while (!procesos.isEmpty() && tiempoMonitoreo > 0) {
+            Proceso procesoActual = procesos.poll();
+
+            int tiempoPorProceso = Math.min(tiempoAsignadoPorUsuario / procesosPorUsuario.get(procesoActual.getUser()), tiempoMonitoreo);
+
+            if (tiempoPorProceso < 1) tiempoPorProceso = 1;
+
+            // Si el proceso aún no se ha ejecutado, lo agrega a la lista de procesos en ejecución
+            if (!procesosEnEjecucion.contains(procesoActual)) {
+                procesosEnEjecucion.add(procesoActual);
+            }
+
+            // Ejecuta el proceso por el tiempo asignado o hasta que termine
+            boolean exec = procesoActual.ejecutar(preemptive ? tiempoPorProceso : procesoActual.getTiempoEjecucion());
+
+            // Actualiza el tiempo de monitoreo
+            tiempoMonitoreo -= tiempoPorProceso;
+
+            // Si el proceso ha completado su ejecución
+            if (procesoActual.estaCompleto()) {
+                procesosCompletados.add(procesoActual);
+                procesosEnEjecucion.remove(procesoActual);
+                // Reduce el conteo de procesos restantes para el usuario
+                procesosPorUsuario.put(procesoActual.getUser(), procesosPorUsuario.get(procesoActual.getUser()) - 1);
+            } else {
+                // Si no ha terminado, se coloca nuevamente al final de la cola
+                procesos.add(procesoActual);
+            }
+        }
+
+        // Agrega los procesos restantes que no se ejecutaron a la lista de procesos sin ejecutar
+        for (Proceso proceso : procesos) {
+            if (!procesosEnEjecucion.contains(proceso)) {
+                procesosSinEjecutar.add(proceso);
+            }
+        }
+    }
+
+
+}
     
     
 

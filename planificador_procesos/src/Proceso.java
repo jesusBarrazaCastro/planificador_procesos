@@ -6,12 +6,14 @@ public class Proceso {
         int tiempoEjecucion;
         int estado; // 1: en ejecucion - 2: listo - 3: bloqueado
         int prioridad;
+        int user;
 
         public Proceso(int pId, int tiempoEjecucion, int estado){
             this.pId = pId;
             this.tiempoEjecucion = tiempoEjecucion;
             this.estado = estado;
             prioridad = new Random().nextInt(1, 5);
+            user = new Random().nextInt(1, 4);
         }
 
         Random random = new Random();
@@ -30,6 +32,10 @@ public class Proceso {
 
         public int getPrioridad() {
             return prioridad;
+        }
+
+        public int getUser() {
+            return user;
         }
 
         public void setEstado(int estado) {

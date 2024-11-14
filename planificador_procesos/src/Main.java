@@ -99,7 +99,7 @@ public class Main {
         System.out.println("Quantum para cada proceso: " + quantum + "\n");
         System.out.println("Tabla de procesos creada:");
         System.out.println("-------------------------------------------------------------------------------");
-        System.out.printf("%-10s %-20s %-10s %-10s%n", "Proceso", "Tiempo ejecucion", "Estado", "Prioridad");
+        System.out.printf("%-10s %-20s %-10s %-10s %-10s%n", "Proceso", "Tiempo ejecucion", "Estado", "Prioridad", "Usuario");
         simulador.getProcesos();
         System.out.println("-------------------------------------------------------------------------------\n");
 
