@@ -17,6 +17,7 @@ public class Simulador {
         this.quantum = quantum;
     }
 
+    Random random = new Random();
     int cantidadCambios = 0;
 
     
@@ -36,14 +37,14 @@ public class Simulador {
         }
     }
 
-    public void simular(int tipoAlgoritmo, int algoritmo){
+    public void simular(int tipoAlgoritmo, int algoritmo, int iteracionProcesoNuevo){
         boolean preemptive = tipoAlgoritmo == 1;
         switch (algoritmo){
             case 1:
                 ejecutarRoundRobin(preemptive);
                 break;
             case 2:
-                ejecutarPrioridades(preemptive);
+                ejecutarPrioridades(preemptive, iteracionProcesoNuevo); // EXAMEN: MANDAR EL RANDOM PARA GENERAR EL PROCESO NUEVO
                 break;
             case 3:
                 ejecutarMultiplesColasPrioridad(preemptive);
@@ -95,16 +96,28 @@ public class Simulador {
         }
     }
 
-    public void ejecutarPrioridades(boolean preemptive) {
+    public void ejecutarPrioridades(boolean preemptive, int iteracionProcesoNuevo) {
         procesos.sort(Comparator.comparingInt(Proceso::getPrioridad).reversed());
+        int i = 0; //EXAMEN: AGREGAR AVRIABLE PARA SABER EN QUE ITERACION VA EL WHILE
         while (!procesos.isEmpty() && tiempoMonitoreo > 0) {
+            if(i == iteracionProcesoNuevo){ //EXAMEN: VERIFICAR EN LA ITERACION QUE SE DEBE GENERAR EL PROCESO NUEVO
+                System.out.println("\nRandom generado para obtener el nuevo proceso: " + iteracionProcesoNuevo);
+                Proceso procesoNuevo = new Proceso(100, random.nextInt(3, 11), random.nextInt(1, 4)); ///EXAMEN: AGREGAR EL PROCESO NUEVO
+                procesos.add(procesoNuevo);
+                procesos.sort(Comparator.comparingInt(Proceso::getPrioridad).reversed()); //EXAMEN: REORDENAR LA LISTA POR PRIORIDAD
+                System.out.println("se agrego un nuevo proceso, tabla de procesos actual: ");
+                System.out.printf("%-10s %-20s %-10s %-10s %-10s%n", "Proceso", "Tiempo ejecucion", "Estado", "Prioridad", "Usuario");
+                getProcesos();
+            }
             Proceso procesoActual = procesos.poll();
 
-            if (!procesosEnEjecucion.contains(procesoActual)) {
-                procesosEnEjecucion.add(procesoActual);
-            }
-
             boolean exec = procesoActual.ejecutar(preemptive ? quantum : procesoActual.getTiempoEjecucion());
+            if(exec){
+                if (!procesosEnEjecucion.contains(procesoActual)) {
+                    procesosEnEjecucion.add(procesoActual);
+                }
+                tiempoMonitoreo -= (preemptive ? quantum : procesoActual.getTiempoEjecucion());
+            }
 
             if (procesoActual.estaCompleto()) {
                 procesosCompletados.add(procesoActual);
@@ -113,7 +126,7 @@ public class Simulador {
                 procesos.add(procesoActual);  // Si no terminó, regresa a la cola
             }
 
-            if(exec) tiempoMonitoreo -= (preemptive ? quantum : procesoActual.getTiempoEjecucion());
+            i++;
         }
 
         for (Proceso proceso : procesos) {

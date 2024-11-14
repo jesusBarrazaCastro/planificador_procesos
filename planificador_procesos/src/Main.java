@@ -93,6 +93,7 @@ public class Main {
             int estadoActual = random.nextInt(1, 4); // CALCULAR ALEATORIAMENTE EL ESTADO ACTUAL DEL PROCESO
             simulador.agregarProceso(new Proceso(i, tiempoEjecucion, estadoActual));
         }
+        int iteracionProcesoNuevo = random.nextInt(1, numProcesos + 1); // EXAMEN: GENERAR UN RANDOM PARA EL TURNO EN EL QUE SE CREA EL PROCESO NUEVO
 
         System.out.println("\nNumero de procesos: " + numProcesos);
         System.out.println("Tiempo a simular: " + tiempoMonitoreo);
@@ -104,7 +105,7 @@ public class Main {
         System.out.println("-------------------------------------------------------------------------------\n");
 
         System.out.println("Informe de uso del procesados con: " + getNombreAlgoritmo(algoritmoInteractivo) + " (" + (tipoAlgoritmo == 1 ? "Apropiativo" : "No apropiativo") + ").");
-        simulador.simular(tipoAlgoritmo, algoritmoInteractivo);
+        simulador.simular(tipoAlgoritmo, algoritmoInteractivo, iteracionProcesoNuevo);
         scanner.close();
     }
 }
