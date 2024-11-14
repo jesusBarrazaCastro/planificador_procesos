@@ -16,20 +16,20 @@ public class Proceso {
 
         Random random = new Random();
 
-    public int getpId() {
-        return pId;
-    }
-
-    public int getTiempoEjecucion() {
-            return tiempoEjecucion;
+        public int getpId() {
+            return pId;
         }
 
-        public void setTiempoEjecucion(int tiempoEjecucion) {
-            this.tiempoEjecucion = tiempoEjecucion;
+        public int getTiempoEjecucion() {
+            return tiempoEjecucion;
         }
 
         public int getEstado() {
             return estado;
+        }
+
+        public int getPrioridad() {
+            return prioridad;
         }
 
         public void setEstado(int estado) {
@@ -70,21 +70,4 @@ public class Proceso {
             return result.toString();
         }
 
-        public int getDuracion() {
-            return 0;
-        }
-
-        public int getPrioridad() {
-            return 0;
-        }
-
-        public void setDuracion(int tiempoRestante) {
-        }
-
-        public void setTiempoRestante(int i) {
-        }
-
-        public int getTiempoRestante() {
-            return 0;
-        }
     }

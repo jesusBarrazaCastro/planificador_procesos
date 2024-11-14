@@ -81,11 +81,10 @@ public class Simulador {
                 procesosSinEjecutar.add(proceso);
             }
         }
-        
     }
 
     public void ejecutarPrioridades(boolean preemptive) {
-        Collections.sort(procesos, Comparator.comparingInt(Proceso::getPrioridad).reversed());
+        procesos.sort(Comparator.comparingInt(Proceso::getPrioridad).reversed());
         while (!procesos.isEmpty() && tiempoMonitoreo > 0) {
             Proceso procesoActual = procesos.poll();
 
@@ -112,54 +111,6 @@ public class Simulador {
         }
     }
 
-
-
-    // Usamos un Map para almacenar colas separadas por cada nivel de prioridad
-    private static Map<Integer, Queue<Proceso>> colasPrioridad = new TreeMap<>(Collections.reverseOrder());
-    private static final int TIEMPO_QUANTUM = 1000; // Duración de cada turno en milisegundos
-
-    // Método para agregar un proceso a su cola correspondiente según su prioridad
-    public static void EjecutarMultiplesColasdePrioridad (Proceso proceso) {
-        colasPrioridad.computeIfAbsent(proceso.getPrioridad(), k -> new LinkedList<>()).add(proceso);
-        System.out.println("Proceso agregado: " + proceso);
-    }
-
-    // Método para ejecutar los procesos en el sistema
-    public static void ejecutarProcesos() {
-        System.out.println("\nEjecutando procesos con múltiples colas de prioridad:");
-        while (!colasPrioridad.isEmpty()) {
-            // Selecciona la cola con la prioridad más alta disponible
-            int prioridadActual = colasPrioridad.keySet().iterator().next();
-            Queue<Proceso> colaActual = colasPrioridad.get(prioridadActual);
-
-            if (colaActual != null && !colaActual.isEmpty()) {
-                // Round Robin en la cola actual
-                Proceso proceso = colaActual.poll();
-                System.out.println("Ejecutando " + proceso + " con prioridad " + prioridadActual);
-
-                // Simulación de ejecución con quantum
-                int tiempoRestante = proceso.getDuracion();
-                try {
-                    if (tiempoRestante > TIEMPO_QUANTUM) {
-                        Thread.sleep(TIEMPO_QUANTUM);
-                        tiempoRestante -= TIEMPO_QUANTUM;
-                        proceso.setDuracion(tiempoRestante);
-                        colaActual.add(proceso);  // Reenviar a la cola si queda tiempo restante
-                    } else {
-                        Thread.sleep(tiempoRestante);  // Ejecutar el tiempo restante
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-
-                // Eliminar la cola si está vacía
-                if (colaActual.isEmpty()) {
-                    colasPrioridad.remove(prioridadActual);
-                }
-            }
-        }
-        System.out.println("\nTodos los procesos han sido ejecutados.");
-    }
 
 
 
