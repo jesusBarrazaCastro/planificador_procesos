@@ -44,22 +44,25 @@ public class Simulador {
     }
 
     public void simular(int tipoAlgoritmo, int algoritmo){
-        boolean preemprive = tipoAlgoritmo == 1;
+        boolean preemptive = tipoAlgoritmo == 1;
         switch (algoritmo){
             case 1:
-                ejecutarRoundRobin(preemprive);
+                ejecutarRoundRobin(preemptive);
                 break;
             case 2:
-                ejecutarPrioridades(preemprive);
+                ejecutarPrioridades(preemptive);
+                break;
+            case 3:
+                ejecutarMultiplesColasPrioridad(preemptive);
                 break;
             case 4:
-                ejecutarProcesoMasCorto(preemprive);
+                ejecutarProcesoMasCorto(preemptive);
                 break;
             case 5:
-                ejecutarPlanificacionGarantizada(preemprive);
+                ejecutarPlanificacionGarantizada(preemptive);
                 break;
             case 6:
-                ejecturarBoletosLoteria(preemprive);
+                ejecturarBoletosLoteria(preemptive);
                 break;
         }
         System.out.println("\nInforme final de ejecucion: ");
@@ -106,7 +109,7 @@ public class Simulador {
                 procesosEnEjecucion.add(procesoActual);
             }
 
-            boolean exec = procesoActual.ejecutar(preemptive ? procesoActual.getTiempoEjecucion() : 1);
+            boolean exec = procesoActual.ejecutar(preemptive ? quantum : procesoActual.getTiempoEjecucion());
 
             if (procesoActual.estaCompleto()) {
                 procesosCompletados.add(procesoActual);
@@ -115,14 +118,43 @@ public class Simulador {
                 procesos.add(procesoActual);  // Si no terminó, regresa a la cola
             }
 
-            tiempoMonitoreo -= exec ? procesoActual.getTiempoEjecucion() : 0;
+            if(exec) tiempoMonitoreo -= (preemptive ? quantum : procesoActual.getTiempoEjecucion());
         }
 
         for (Proceso proceso : procesos) {
             if (!procesosEnEjecucion.contains(proceso)) {
                 procesosEnEjecucion.add(proceso);
-            }}
+            }
         }
+    }
+
+    public void ejecutarMultiplesColasPrioridad(boolean preemptive) {
+        procesos.sort(Comparator.comparingInt(Proceso::getPrioridad).reversed());
+        while (!procesos.isEmpty() && tiempoMonitoreo > 0) {
+            Proceso procesoActual = procesos.poll();
+
+            if (!procesosEnEjecucion.contains(procesoActual)) {
+                procesosEnEjecucion.add(procesoActual);
+            }
+
+            boolean exec = procesoActual.ejecutar(preemptive ? quantum : procesoActual.getTiempoEjecucion());
+
+            if (procesoActual.estaCompleto()) {
+                procesosCompletados.add(procesoActual);
+                procesosEnEjecucion.remove(procesoActual);
+            } else {
+                procesos.add(procesoActual);  // Si no terminó, regresa a la cola
+            }
+
+            if(exec) tiempoMonitoreo -= (preemptive ? quantum : procesoActual.getTiempoEjecucion());
+        }
+
+        for (Proceso proceso : procesos) {
+            if (!procesosEnEjecucion.contains(proceso)) {
+                procesosEnEjecucion.add(proceso);
+            }
+        }
+    }
 
         public void ejecutarProcesoMasCorto(boolean preemptive) {
             while (!procesos.isEmpty() && tiempoMonitoreo > 0) {
@@ -137,8 +169,8 @@ public class Simulador {
                 }
         
                 // Ejecuta el proceso por el tiempo especificado o hasta que termine
-                boolean exec = procesoActual.ejecutar(preemptive ? 1 : procesoActual.getTiempoEjecucion());
-        
+                boolean exec = procesoActual.ejecutar(preemptive ? quantum : procesoActual.getTiempoEjecucion());
+
                 // Verifica si el proceso ha completado su ejecución
                 if (procesoActual.estaCompleto()) {
                     procesosCompletados.add(procesoActual);
@@ -149,7 +181,7 @@ public class Simulador {
                 }
         
                 // Actualiza el tiempo de monitoreo
-                tiempoMonitoreo -= (preemptive ? 1 : procesoActual.getTiempoEjecucion());
+                if(exec) tiempoMonitoreo -= (preemptive ? quantum : procesoActual.getTiempoEjecucion());
             }
         
             // Agrega los procesos restantes no ejecutados a la lista de procesos sin ejecutar
@@ -189,6 +221,7 @@ public class Simulador {
                     // Si no ha terminado, se coloca nuevamente al final de la cola
                     procesos.add(procesoActual);
                 }
+                if(exec) tiempoMonitoreo -= (preemptive ? tiempoAsignado : procesoActual.getTiempoEjecucion());
             }
         
             // Agrega los procesos restantes a la lista de procesos sin ejecutar
