@@ -51,7 +51,7 @@ public class Simulador {
         System.out.println("\nInforme final de ejecucion: ");
         System.out.println("Procesos completados: " + Proceso.getProcesosIds(procesosCompletados));
         System.out.println("Procesos sin ejecutar: " + Proceso.getProcesosIds(procesosSinEjecutar));
-        System.out.println("Procesos que siguen en ejecucion: " + Proceso.getProcesosIds(procesosSinEjecutar));
+        System.out.println("Procesos que siguen en ejecucion: " + Proceso.getProcesosIds(procesosEnEjecucion));
         //System.out.println();
     }
 

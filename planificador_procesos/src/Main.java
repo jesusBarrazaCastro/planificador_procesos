@@ -37,8 +37,9 @@ public class Main {
         System.out.println("3. Múltiples colas de prioridad");
         System.out.println("4. Proceso más corto primero");
         System.out.println("5. Planificación garantizada");
-        System.out.println("6. Boletos de Lotería o Participación equitativa");
-        System.out.print("Ingrese su opción (1-6): ");
+        System.out.println("6. Boletos de Lotería");
+        System.out.println("7. Participación equitativa");
+        System.out.print("Ingrese su opción (1-7): ");
 
         algoritmoInteractivo = scanner.nextInt();
 
