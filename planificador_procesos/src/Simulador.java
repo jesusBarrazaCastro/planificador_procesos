@@ -129,29 +129,77 @@ public class Simulador {
     }
 
     public void ejecutarMultiplesColasPrioridad(boolean preemptive) {
-        procesos.sort(Comparator.comparingInt(Proceso::getPrioridad).reversed());
-        while (!procesos.isEmpty() && tiempoMonitoreo > 0) {
-            Proceso procesoActual = procesos.poll();
+        Queue<Proceso> colaPrioridad4 = new LinkedList<>();
+        Queue<Proceso> colaPrioridad3 = new LinkedList<>();
+        Queue<Proceso> colaPrioridad2 = new LinkedList<>();
+        Queue<Proceso> colaPrioridad1 = new LinkedList<>();
 
+        // clasificar los procesos en las colas según su prioridad
+        for (Proceso proceso : procesos) {
+            switch (proceso.getPrioridad()) {
+                case 4:
+                    colaPrioridad4.add(proceso);
+                    break;
+                case 3:
+                    colaPrioridad3.add(proceso);
+                    break;
+                case 2:
+                    colaPrioridad2.add(proceso);
+                    break;
+                case 1:
+                    colaPrioridad1.add(proceso);
+                    break;
+            }
+        }
+
+        // Ejecutar procesos por orden de prioridad
+        while (tiempoMonitoreo > 0 && (!colaPrioridad4.isEmpty() || !colaPrioridad3.isEmpty() || !colaPrioridad2.isEmpty() || !colaPrioridad1.isEmpty())) {
+            if (!colaPrioridad4.isEmpty()) {
+                ejecutarCola(colaPrioridad4, preemptive);
+            } else if (!colaPrioridad3.isEmpty()) {
+                ejecutarCola(colaPrioridad3, preemptive);
+            } else if (!colaPrioridad2.isEmpty()) {
+                ejecutarCola(colaPrioridad2, preemptive);
+            } else if (!colaPrioridad1.isEmpty()) {
+                ejecutarCola(colaPrioridad1, preemptive);
+            }
+        }
+
+        // registrar procesos no ejecutados
+        registrarNoEjecutados(colaPrioridad4);
+        registrarNoEjecutados(colaPrioridad3);
+        registrarNoEjecutados(colaPrioridad2);
+        registrarNoEjecutados(colaPrioridad1);
+    }
+
+    // metodo auxiliar para ejecutar procesos de una cola específica
+    private void ejecutarCola(Queue<Proceso> cola, boolean preemptive) {
+        Proceso procesoActual = cola.poll();
+        if (procesoActual != null) {
             if (!procesosEnEjecucion.contains(procesoActual)) {
                 procesosEnEjecucion.add(procesoActual);
             }
 
+            // Ejecutamos el proceso actual
             boolean exec = procesoActual.ejecutar(preemptive ? quantum : procesoActual.getTiempoEjecucion());
 
             if (procesoActual.estaCompleto()) {
                 procesosCompletados.add(procesoActual);
                 procesosEnEjecucion.remove(procesoActual);
             } else {
-                procesos.add(procesoActual);  // Si no terminó, regresa a la cola
+                cola.add(procesoActual); // Si no terminó, vuelve a la cola
             }
 
-            if(exec) tiempoMonitoreo -= (preemptive ? quantum : procesoActual.getTiempoEjecucion());
+            // Reducimos el tiempo de monitoreo
+            if (exec) tiempoMonitoreo -= (preemptive ? quantum : procesoActual.getTiempoEjecucion());
         }
+    }
 
-        for (Proceso proceso : procesos) {
-            if (!procesosEnEjecucion.contains(proceso)) {
-                procesosEnEjecucion.add(proceso);
+    private void registrarNoEjecutados(Queue<Proceso> cola) {
+        while (!cola.isEmpty()) {
+            Proceso proceso = cola.poll();
+            if (!procesosEnEjecucion.contains(proceso) && !procesosCompletados.contains(proceso)) {
+                procesosSinEjecutar.add(proceso);
             }
         }
     }
