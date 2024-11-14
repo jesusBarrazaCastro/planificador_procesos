@@ -3,6 +3,19 @@ import java.util.Random;
 
 public class Main {
 
+    public static String getNombreAlgoritmo(int opcion) {
+        return switch (opcion) {
+            case 1 -> "Round-robin";
+            case 2 -> "Prioridades";
+            case 3 -> "Múltiples colas de prioridad";
+            case 4 -> "Proceso más corto primero";
+            case 5 -> "Planificación garantizada";
+            case 6 -> "Boletos de Lotería";
+            case 7 -> "Participación equitativa";
+            default -> null; // Devuelve null si la opción es inválida
+        };
+    }
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         Random random = new Random();
@@ -84,10 +97,13 @@ public class Main {
         System.out.println("\nNumero de procesos: " + numProcesos);
         System.out.println("Tiempo a simular: " + tiempoMonitoreo);
         System.out.println("Quantum para cada proceso: " + quantum + "\n");
-        System.out.println("Tabla de procesos creada: \n");
-        System.out.println("Proceso | Tiempo restante ejecucion | Estado actual");
+        System.out.println("Tabla de procesos creada:");
+        System.out.println("-------------------------------------------------------------------------------");
+        System.out.printf("%-10s %-20s %-10s %-10s%n", "Proceso", "Tiempo ejecucion", "Estado", "Prioridad");
         simulador.getProcesos();
+        System.out.println("-------------------------------------------------------------------------------\n");
 
+        System.out.println("Informe de uso del procesados con: " + getNombreAlgoritmo(algoritmoInteractivo) + " (" + (tipoAlgoritmo == 1 ? "Apropiativo" : "No apropiativo") + ").");
         simulador.simular(tipoAlgoritmo, algoritmoInteractivo);
         scanner.close();
     }

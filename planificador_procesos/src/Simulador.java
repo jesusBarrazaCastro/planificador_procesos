@@ -34,7 +34,12 @@ public class Simulador {
 
     public void getProcesos(){
         for (Proceso proceso : procesos) {
-            System.out.println(proceso.toString());
+            System.out.printf("%-10s %-20d %-10s %-10d%n",
+                    proceso.getpId(),
+                    proceso.getTiempoEjecucion(),
+                    proceso.getEstado(),
+                    proceso.getPrioridad()
+            );
         }
     }
 
