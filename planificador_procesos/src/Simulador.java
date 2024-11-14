@@ -160,13 +160,45 @@ public class Simulador {
             }
         }
 
-
-        public void ejecutarPlanificacionGarantizada(boolean preemprive) {
-
-
-
-
+        public void ejecutarPlanificacionGarantizada(boolean preemptive) {
+            // Mientras haya procesos por ejecutar y tiempo de monitoreo disponible
+            while (!procesos.isEmpty() && tiempoMonitoreo > 0) {
+                int n = procesos.size(); // Número actual de procesos en cola
+                int tiempoAsignado = tiempoMonitoreo / n; // Fracción del tiempo de CPU para cada proceso
+                
+                // Si el tiempo asignado es menor que 1, asignamos al menos 1 unidad de tiempo por proceso
+                if (tiempoAsignado < 1) tiempoAsignado = 1;
+                
+                Proceso procesoActual = procesos.poll(); // Obtiene y elimina el primer proceso en la cola
+        
+                if (!procesosEnEjecucion.contains(procesoActual)) {
+                    procesosEnEjecucion.add(procesoActual);
+                }
+        
+                // Ejecuta el proceso por el tiempo asignado o hasta que termine
+                boolean exec = procesoActual.ejecutar(preemptive ? tiempoAsignado : procesoActual.getTiempoEjecucion());
+        
+                // Actualizar el tiempo de monitoreo
+                tiempoMonitoreo -= tiempoAsignado;
+        
+                // Si el proceso ha completado su ejecución
+                if (procesoActual.estaCompleto()) {
+                    procesosCompletados.add(procesoActual);
+                    procesosEnEjecucion.remove(procesoActual);
+                } else {
+                    // Si no ha terminado, se coloca nuevamente al final de la cola
+                    procesos.add(procesoActual);
+                }
+            }
+        
+            // Agrega los procesos restantes a la lista de procesos sin ejecutar
+            for (Proceso proceso : procesos) {
+                if (!procesosEnEjecucion.contains(proceso)) {
+                    procesosSinEjecutar.add(proceso);
+                }
+            }
         }
+        
 
         public void ejecturarBoletosLoteria(boolean preemptive) {
             // Asignar boletos a cada proceso según su prioridad
