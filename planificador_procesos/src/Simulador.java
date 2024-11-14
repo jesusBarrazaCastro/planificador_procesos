@@ -52,6 +52,15 @@ public class Simulador {
             case 2:
                 ejecutarPrioridades(preemprive);
                 break;
+            case 4:
+                ejecutarProcesoMasCorto(preemprive);
+                break;
+            case 5:
+                ejecutarPlanificacionGarantizada(preemprive);
+                break;
+            case 6:
+                ejecturarBoletosLoteria(preemprive);
+                break;
         }
         System.out.println("\nInforme final de ejecucion: ");
         System.out.println("Procesos completados: " + Proceso.getProcesosIds(procesosCompletados));
@@ -112,11 +121,131 @@ public class Simulador {
         for (Proceso proceso : procesos) {
             if (!procesosEnEjecucion.contains(proceso)) {
                 procesosEnEjecucion.add(proceso);
+            }}
+        }
+
+        public void ejecutarProcesoMasCorto(boolean preemptive) {
+            while (!procesos.isEmpty() && tiempoMonitoreo > 0) {
+                // Ordena los procesos por el tiempo de ejecución restante en orden ascendente
+                procesos.sort(Comparator.comparingInt(Proceso::getTiempoEjecucion));
+        
+                // Obtiene el proceso con el menor tiempo de ejecución restante
+                Proceso procesoActual = procesos.poll();
+        
+                if (!procesosEnEjecucion.contains(procesoActual)) {
+                    procesosEnEjecucion.add(procesoActual);
+                }
+        
+                // Ejecuta el proceso por el tiempo especificado o hasta que termine
+                boolean exec = procesoActual.ejecutar(preemptive ? 1 : procesoActual.getTiempoEjecucion());
+        
+                // Verifica si el proceso ha completado su ejecución
+                if (procesoActual.estaCompleto()) {
+                    procesosCompletados.add(procesoActual);
+                    procesosEnEjecucion.remove(procesoActual);
+                } else {
+                    // Si el proceso no ha terminado, lo agrega de nuevo a la cola
+                    procesos.add(procesoActual);
+                }
+        
+                // Actualiza el tiempo de monitoreo
+                tiempoMonitoreo -= (preemptive ? 1 : procesoActual.getTiempoEjecucion());
+            }
+        
+            // Agrega los procesos restantes no ejecutados a la lista de procesos sin ejecutar
+            for (Proceso proceso : procesos) {
+                if (!procesosEnEjecucion.contains(proceso)) {
+                    procesosSinEjecutar.add(proceso);
+                }
             }
         }
-    }
+
+
+        public void ejecutarPlanificacionGarantizada(boolean preemprive) {
 
 
 
 
-}
+        }
+
+        public void ejecturarBoletosLoteria(boolean preemptive) {
+            // Asignar boletos a cada proceso según su prioridad
+            Map<Proceso, Integer> boletos = new TreeMap<>();
+            int totalBoletos = 0;
+        
+            for (Proceso proceso : procesos) {
+                int cantidadBoletos = proceso.getPrioridad() + 1; // Definir boletos según la prioridad, sumando al menos uno
+                boletos.put(proceso, cantidadBoletos);
+                totalBoletos += cantidadBoletos;
+            }
+        
+            Random rand = new Random();
+        
+            while (!procesos.isEmpty() && tiempoMonitoreo > 0) {
+                // Elegir un número aleatorio como boleto ganador
+                int boletoGanador = rand.nextInt(totalBoletos);
+        
+                // Buscar el proceso que contiene el boleto ganador
+                Proceso procesoSeleccionado = null;
+                int acumulado = 0;
+                for (Map.Entry<Proceso, Integer> entry : boletos.entrySet()) {
+                    acumulado += entry.getValue();
+                    if (acumulado > boletoGanador) {
+                        procesoSeleccionado = entry.getKey();
+                        break;
+                    }
+                }
+        
+                if (procesoSeleccionado != null) {
+                    procesos.remove(procesoSeleccionado);
+                    if (!procesosEnEjecucion.contains(procesoSeleccionado)) {
+                        procesosEnEjecucion.add(procesoSeleccionado);
+                    }
+        
+                    // Ejecutar el proceso seleccionado
+                    boolean exec = procesoSeleccionado.ejecutar(preemptive ? 1 : procesoSeleccionado.getTiempoEjecucion());
+        
+                    // Actualizar el tiempo de monitoreo
+                    tiempoMonitoreo -= (preemptive ? 1 : procesoSeleccionado.getTiempoEjecucion());
+        
+                    // Si el proceso termina, moverlo a completados
+                    if (procesoSeleccionado.estaCompleto()) {
+                        procesosCompletados.add(procesoSeleccionado);
+                        procesosEnEjecucion.remove(procesoSeleccionado);
+                        totalBoletos -= boletos.get(procesoSeleccionado); // Reducir los boletos totales
+                        boletos.remove(procesoSeleccionado);
+                    } else {
+                        // Reinsertar el proceso en la lista si no ha terminado
+                        procesos.add(procesoSeleccionado);
+                    }
+                }
+            }
+        
+            // Agregar los procesos restantes a la lista de procesos sin ejecutar
+            for (Proceso proceso : procesos) {
+                if (!procesosEnEjecucion.contains(proceso)) {
+                    procesosSinEjecutar.add(proceso);
+                }
+            }
+        }
+        
+        
+
+        
+
+    }   
+    
+    
+
+        
+
+        
+
+
+        
+    
+
+
+
+
+    
